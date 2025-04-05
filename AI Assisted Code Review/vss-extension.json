@@ -1,10 +1,10 @@
 {
     "manifestVersion": 1,
-    "id": "ai-assisted-code-review",
-    "version": "1.1.0",
+    "id": "aeries-ai-assisted-code-review",
+    "version": "1.0.0",
     "name": "AI-Assisted Code Review",
     "publisher": "AeriesSoftware",
-    "public": true,
+    "public": false,
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"
