@@ -1,9 +1,9 @@
 {
     "manifestVersion": 1,
     "id": "ai-assisted-code-review",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "name": "AI-Assisted Code Review",
-    "publisher": "JithinJojiAnchanattu",
+    "publisher": "AeriesSoftware",
     "public": true,
     "targets": [
         {
@@ -40,13 +40,13 @@
     },
     "links": {
         "support": {
-            "uri": "https://github.com/jithinanchanattu/AI-Assisted-Code-Review/issues/new?assignees=&labels=bug&template=bug_report.md&title=",
+            "uri": "https://github.com/jameslancaster/AI-Assisted-Code-Review/issues/new?assignees=&labels=bug&template=bug_report.md&title=",
             "version": "1.0.0"
         }
     },
     "repository": {
         "type": "git",
-        "uri": "https://github.com/jithinanchanattu/AI-Assisted-Code-Review"
+        "uri": "https://github.com/jameslancaster/AI-Assisted-Code-Review"
     },
     "screenshots": [
         {
