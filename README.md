@@ -11,7 +11,7 @@ Supercharge your workflow with AI-powered code reviews. Install the extension no
 ## Why Use AI-Assisted Code Review?
 
 - **Automated Code Analysis:** Eliminate manual inspections with AI-driven analysis that detects bugs, performance issues, and suggests best practices automatically.
-- **Simple Installation:** Get started quickly with a one-click installation from the [Azure DevOps Marketplace](https://marketplace.visualstudio.com/items?itemName=JithinJojiAnchanattu.ai-assisted-code-review).
+- **Simple Installation:** Get started quickly with a one-click installation from the [Azure DevOps Marketplace](https://marketplace.visualstudio.com/items?itemName=AeriesSoftware.aeries-ai-assisted-code-review).
 - **Intelligent Insights:** Harness advanced natural language processing to receive meaningful feedback on your pull requests.
 - **Accelerated Review Cycles:** Save time by letting AI handle routine reviews, so your team can focus on what truly matters.
 - **Customizable Settings:** Adapt the extension to your needs by configuring the AI model, file exclusions, additional review prompts, and even the OpenAI API URL.
@@ -26,7 +26,7 @@ Supercharge your workflow with AI-powered code reviews. Install the extension no
 
 ## Getting started
 
-1. Install the AI Assisted Code Review DevOps Extension from the [Azure DevOps Marketplace]([https://marketplace.visualstudio.com/azuredevops](https://marketplace.visualstudio.com/items?itemName=JithinJojiAnchanattu.ai-assisted-code-review)).
+1. Install the AI Assisted Code Review DevOps Extension from the [Azure DevOps Marketplace]([https://marketplace.visualstudio.com/azuredevops](https://marketplace.visualstudio.com/items?itemName=AeriesSoftware.aeries-ai-assisted-code-review)).
 2. Add AI Assisted Code Review Task to Your Pipeline:
 
    ```yaml
@@ -62,7 +62,7 @@ Supercharge your workflow with AI-powered code reviews. Install the extension no
 
 ## Specifying the AI Model
 
-The `ai_model` input allows you to specify the OpenAI model to use for code reviews. You can choose from supported models like `gpt-4`, `gpt-3.5-turbo`, or any other model supported by OpenAI or the OpenAI-compatible service. If the specified model is not officially supported, a warning will be logged, but the task will proceed.
+The `ai_model` input allows you to specify the OpenAI model to use for code reviews. You can choose from supported models like `gpt-4`, `gpt-3.5-turbo`, or any other model supported by OpenAI. If the specified model is not officially supported, a warning will be logged, but the task will proceed.
 
 ### Example Usage
 
@@ -79,7 +79,7 @@ inputs:
 
 ### Notes:
 - If the model is not in the list of officially supported models, a warning will be logged, but the task will still attempt to use the specified model.
-- Ensure the model you specify is available in your OpenAI account or service.
+- Ensure the model you specify is available in your OpenAI account.
 
 ## Custom API URL Support
 
@@ -111,11 +111,11 @@ A: Build Administrators must be given "Contribute to pull requests" access. Chec
 
 ### Bug Reports
 
-If you find a bug or unexpected behavior, please [open a bug report](https://github.com/jithinanchanattu/AI-Assisted-Code-Review/issues/new?assignees=&labels=bug&template=bug_report.md&title=).
+If you find a bug or unexpected behavior, please [open a bug report](https://github.com/jameslancaster/AI-Assisted-Code-Review/issues/new?assignees=&labels=bug&template=bug_report.md&title=).
 
 ### Feature Requests
 
-If you have ideas for new features or enhancements, please [submit a feature request](https://github.com/jithinanchanattu/AI-Assisted-Code-Review/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=).
+If you have ideas for new features or enhancements, please [submit a feature request](https://github.com/jameslancaster/AI-Assisted-Code-Review/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=).
 
 ## License
 
