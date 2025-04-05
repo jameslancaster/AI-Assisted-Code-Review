@@ -1,7 +1,7 @@
 {
     "manifestVersion": 1,
     "id": "aeries-ai-assisted-code-review",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "name": "AI-Assisted Code Review",
     "publisher": "AeriesSoftware",
     "public": false,
