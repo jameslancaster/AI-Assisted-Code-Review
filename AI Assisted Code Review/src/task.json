@@ -5,7 +5,7 @@
     "friendlyName": "AI-Assisted Code Review",
     "description": "Complete Code Review using AI",
     "category": "Utility",
-    "author": "Jithin Joji Anchanattu",
+    "author": "James Lancaster",
     "version": {
         "Major": 1,
         "Minor": 0,
@@ -19,30 +19,23 @@
             "label": "Open AI API Key",
             "defaultValue": "",
             "required": true,
-            "helpMarkDown": "API Key for Open AI API. "
+            "helpMarkDown": "API Key for Open AI API."
         },
         {
             "name": "ai_model",
-            "type": "pickList",
+            "type": "string",
             "label": "Open AI API Model",
             "defaultValue": "gpt-3.5-turbo",
-            "options": {
-                "gpt-4-1106-preview": "gpt-4-1106-preview",
-                "gpt-4-vision-preview": "gpt-4-vision-preview",
-                "gpt-4": "gpt-4",
-                "gpt-4-0314": "gpt-4-0314",
-                "gpt-4-0613": "gpt-4-0613",
-                "gpt-4-32k": "gpt-4-32k",
-                "gpt-4-32k-0314": "gpt-4-32k-0314",
-                "gpt-4-32k-0613": "gpt-4-32k-0613",
-                "gpt-3.5-turbo-1106": "gpt-3.5-turbo-1106",
-                "gpt-3.5-turbo": "gpt-3.5-turbo",
-                "gpt-3.5-turbo-16k": "gpt-3.5-turbo-16k",
-                "gpt-3.5-turbo-0301": "gpt-3.5-turbo-0301",
-                "gpt-3.5-turbo-0613": "gpt-3.5-turbo-0613",
-                "gpt-3.5-turbo-16k-0613": "gpt-3.5-turbo-16k-0613"
-            },
-            "helpMarkDown": "## OpenAI API Model Configuration\n\n### Description\nChoose the Open AI API model for code analysis. The selected model determines the depth and capabilities of the code review performed by Open AI.\n\n### Options\n- **gpt-4-1106-preview:** Preview version of GPT-4 released on June 11, 202x.\n- **gpt-4-vision-preview:** Preview version of GPT-4 with enhanced vision capabilities.\n- **gpt-4:** Latest stable release of GPT-4.\n- **gpt-4-0314:** GPT-4 version released on March 14, 202x.\n- **gpt-4-0613:** GPT-4 version released on June 13, 202x.\n- **gpt-4-32k:** GPT-4 version with a 32k parameter size.\n- **gpt-4-32k-0314:** GPT-4 version with 32k parameters, released on March 14, 202x.\n- **gpt-4-32k-0613:** GPT-4 version with 32k parameters, released on June 13, 202x.\n- **gpt-3.5-turbo-1106:** Preview version of GPT-3.5 Turbo released on November 6, 202x.\n- **gpt-3.5-turbo:** Latest stable release of GPT-3.5 Turbo.\n- **gpt-3.5-turbo-16k:** GPT-3.5 Turbo version with a 16k parameter size.\n- **gpt-3.5-turbo-0301:** GPT-3.5 Turbo version released on March 1, 202x.\n- **gpt-3.5-turbo-0613:** GPT-3.5 Turbo version released on June 13, 202x.\n- **gpt-3.5-turbo-16k-0613:** GPT-3.5 Turbo version with 16k parameters, released on June 13, 202x.\n\n### Default Value\nThe default Open AI API model is set to **gpt-3.5-turbo**.\n\n Choose the model that best suits your code review requirements."
+            "required": true,
+            "helpMarkDown": "Specify the Open AI model to use for code reviews. You can provide any valid model name supported by OpenAI, such as `gpt-4`, `gpt-3.5-turbo`, or custom models."
+        },
+        {
+            "name": "api_url",
+            "type": "string",
+            "label": "Open AI API URL",
+            "defaultValue": "https://api.openai.com/v1",
+            "required": false,
+            "helpMarkDown": "Specify a custom URL for the Open AI API. This is useful if you are using a proxy, a custom deployment of the OpenAI API, or an alternative API endpoint. If not provided, the default URL (`https://api.openai.com/v1`) will be used."
         },
         {
             "name": "bugs",
