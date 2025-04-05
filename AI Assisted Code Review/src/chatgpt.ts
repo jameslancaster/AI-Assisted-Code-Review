@@ -67,8 +67,7 @@ export class ChatGPT {
                         content: diff
                     }
                 ],
-                model: model,
-                baseURL: this.apiUrl // Use the custom API URL
+                model: model
             });
 
             let response = openAi.choices;

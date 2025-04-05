@@ -30,25 +30,20 @@ export class Main {
 
         let proxyUrl = tl.getVariable('Agent.ProxyUrl');
 
-        if (!proxyUrl) {
-            this._chatGpt = new ChatGPT(
-                new OpenAI({ apiKey: apiKey }),
-                tl.getBoolInput('bugs', true),
-                tl.getBoolInput('performance', true),
-                tl.getBoolInput('best_practices', true),
-                additionalPrompts,
-                customApiUrl // Pass the custom API URL
-            );
-        } else {
-            this._chatGpt = new ChatGPT(
-                new OpenAI({ apiKey: apiKey, httpAgent: new HttpsProxyAgent(proxyUrl) }),
-                tl.getBoolInput('bugs', true),
-                tl.getBoolInput('performance', true),
-                tl.getBoolInput('best_practices', true),
-                additionalPrompts,
-                customApiUrl // Pass the custom API URL
-            );
-        }
+        const openAiClient = new OpenAI({
+            apiKey: apiKey,
+            baseURL: customApiUrl, // Set the custom API URL here
+            httpAgent: proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined
+        });
+
+        this._chatGpt = new ChatGPT(
+            openAiClient,
+            tl.getBoolInput('bugs', true),
+            tl.getBoolInput('performance', true),
+            tl.getBoolInput('best_practices', true),
+            additionalPrompts,
+            customApiUrl
+        );
 
         this._repository = new Repository();
         this._pullRequest = new PullRequest();
