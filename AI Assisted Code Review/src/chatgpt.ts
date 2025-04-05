@@ -4,8 +4,34 @@ import OpenAI from "openai";
 
 export class ChatGPT {
     private readonly systemMessage: string = '';
+    private readonly apiUrl: string;
+    private readonly supportedModels: string[] = [
+        'gpt-4-1106-preview',
+        'gpt-4-vision-preview',
+        'gpt-4',
+        'gpt-4-0314',
+        'gpt-4-0613',
+        'gpt-4-32k',
+        'gpt-4-32k-0314',
+        'gpt-4-32k-0613',
+        'gpt-3.5-turbo-1106',
+        'gpt-3.5-turbo',
+        'gpt-3.5-turbo-16k',
+        'gpt-3.5-turbo-0301',
+        'gpt-3.5-turbo-0613',
+        'gpt-3.5-turbo-16k-0613'
+    ];
 
-    constructor(private _openAi: OpenAI, checkForBugs: boolean = false, checkForPerformance: boolean = false, checkForBestPractices: boolean = false, additionalPrompts: string[] = []) {
+    constructor(
+        private _openAi: OpenAI,
+        checkForBugs: boolean = false,
+        checkForPerformance: boolean = false,
+        checkForBestPractices: boolean = false,
+        additionalPrompts: string[] = [],
+        apiUrl: string = 'https://api.openai.com/v1' // Default OpenAI API URL
+    ) {
+        this.apiUrl = apiUrl;
+
         this.systemMessage = `Your task is to act as a code reviewer of a Pull Request:
         - Use bullet points if you have multiple comments.
         ${checkForBugs ? '- If there are any bugs, highlight them.' : null}
@@ -18,26 +44,16 @@ export class ChatGPT {
     
         You are provided with the code changes (diffs) in a unidiff format.
         
-        The response should be in markdown format.`
+        The response should be in markdown format.`;
     }
 
     public async PerformCodeReview(diff: string, fileName: string): Promise<string> {
+        let model = tl.getInput('ai_model', true) as string; // Allow any string as the model name
 
-        let model = tl.getInput('ai_model', true) as | (string & {})
-            | 'gpt-4-1106-preview'
-            | 'gpt-4-vision-preview'
-            | 'gpt-4'
-            | 'gpt-4-0314'
-            | 'gpt-4-0613'
-            | 'gpt-4-32k'
-            | 'gpt-4-32k-0314'
-            | 'gpt-4-32k-0613'
-            | 'gpt-3.5-turbo-1106'
-            | 'gpt-3.5-turbo'
-            | 'gpt-3.5-turbo-16k'
-            | 'gpt-3.5-turbo-0301'
-            | 'gpt-3.5-turbo-0613'
-            | 'gpt-3.5-turbo-16k-0613';
+        // Validate the model
+        if (!this.supportedModels.includes(model)) {
+            tl.warning(`The specified model "${model}" is not officially supported. Proceeding with caution.`);
+        }
 
         if (!this.doesMessageExceedTokenLimit(diff + this.systemMessage, 4097)) {
             let openAi = await this._openAi.chat.completions.create({
@@ -50,7 +66,9 @@ export class ChatGPT {
                         role: 'user',
                         content: diff
                     }
-                ], model: model
+                ],
+                model: model,
+                baseURL: this.apiUrl // Use the custom API URL
             });
 
             let response = openAi.choices;
@@ -60,7 +78,7 @@ export class ChatGPT {
             }
         }
 
-        tl.warning(`Unable to process diff for file ${fileName} as it exceeds token limits.`)
+        tl.warning(`Unable to process diff for file ${fileName} as it exceeds token limits.`);
         return '';
     }
 
@@ -68,5 +86,4 @@ export class ChatGPT {
         let tokens = encode(message);
         return tokens.length > tokenLimit;
     }
-
 }

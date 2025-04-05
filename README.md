@@ -1,4 +1,3 @@
-
 # AI-Assisted Code Review for Azure DevOps
 
 ## Elevate Your Code Review Process with AI
@@ -15,7 +14,7 @@ Supercharge your workflow with AI-powered code reviews. Install the extension no
 - **Simple Installation:** Get started quickly with a one-click installation from the [Azure DevOps Marketplace](https://marketplace.visualstudio.com/items?itemName=JithinJojiAnchanattu.ai-assisted-code-review).
 - **Intelligent Insights:** Harness advanced natural language processing to receive meaningful feedback on your pull requests.
 - **Accelerated Review Cycles:** Save time by letting AI handle routine reviews, so your team can focus on what truly matters.
-- **Customizable Settings:** Adapt the extension to your needs by configuring the AI model, file exclusions, and additional review prompts.
+- **Customizable Settings:** Adapt the extension to your needs by configuring the AI model, file exclusions, additional review prompts, and even the OpenAI API URL.
 
 ## AI-Assisted Code Review - Flow Diagram
 ![image](https://github.com/user-attachments/assets/52f6a1b3-c1f3-4496-bb1f-857393d261ab)
@@ -49,15 +48,56 @@ Supercharge your workflow with AI-powered code reviews. Install the extension no
      - task: AIAssistedCodeReviewTask@1
        inputs:
          api_key: $(OpenAI_ApiKey)
-         ai_model: 'gpt-3.5-turbo'
+         ai_model: 'gpt-4' # Specify the model to use
          bugs: true
          performance: true
          best_practices: true
          file_extensions: '.js,.ts,.css,.html'
          file_excludes: 'file1.js,file2.py,secret.txt'
-         additional_prompts: 'Fix variable naming, Ensure consistent indentation, Review error handling approach'`
+         additional_prompts: 'Fix variable naming, Ensure consistent indentation, Review error handling approach'
+         api_url: 'https://custom-openai-api.com/v1' # Optional: Specify a custom OpenAI API URL
+   ```
 
-3. If you do not already have Build Validation configured for your branch already add [Build validation](https://learn.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops&tabs=browser#build-validation) to your branch policy to trigger the code review when a Pull Request is created
+3. If you do not already have Build Validation configured for your branch already add [Build validation](https://learn.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops&tabs=browser#build-validation) to your branch policy to trigger the code review when a Pull Request is created.
+
+## Specifying the AI Model
+
+The `ai_model` input allows you to specify the OpenAI model to use for code reviews. You can choose from supported models like `gpt-4`, `gpt-3.5-turbo`, or any other model supported by OpenAI or the OpenAI-compatible service. If the specified model is not officially supported, a warning will be logged, but the task will proceed.
+
+### Example Usage
+
+To specify the model, include the `ai_model` input in your pipeline configuration:
+
+```yaml
+inputs:
+  api_key: $(OpenAI_ApiKey)
+  ai_model: 'gpt-4' # Replace with the desired model
+  bugs: true
+  performance: true
+  best_practices: true
+```
+
+### Notes:
+- If the model is not in the list of officially supported models, a warning will be logged, but the task will still attempt to use the specified model.
+- Ensure the model you specify is available in your OpenAI account or service.
+
+## Custom API URL Support
+
+The `api_url` input allows you to specify a custom URL for the OpenAI API. This is useful if you are using a proxy, a custom deployment of the OpenAI API, or an alternative API endpoint. If not provided, the default URL (`https://api.openai.com/v1`) will be used.
+
+### Example Usage
+
+To use a custom API URL, include the `api_url` input in your pipeline configuration:
+
+```yaml
+inputs:
+  api_key: $(OpenAI_ApiKey)
+  api_url: 'https://custom-openai-api.com/v1' # Replace with your custom API URL
+  ai_model: 'gpt-4'
+  bugs: true
+  performance: true
+  best_practices: true
+```
 
 ## FAQ
 
