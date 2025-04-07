@@ -95,6 +95,48 @@ inputs:
   best_practices: true
 ```
 
+## Specifying the Maximum Tokens
+
+The `max_tokens` input allows you to configure the maximum number of tokens for the AI model. This parameter ensures that the request stays within the token limit of the selected model, enabling efficient use of different foundation models.
+
+### Example Usage
+
+```yaml
+inputs:
+  api_key: $(OpenAI_ApiKey)
+  ai_model: 'gpt-4'
+  max_tokens: '8192' # Specify the maximum tokens limit
+  bugs: true
+  performance: true
+  best_practices: true
+```
+
+---
+
+## Enabling Access to Other Foundation Models
+
+To use other foundation models, such as those available through AWS Bedrock, you can integrate with the [Bedrock Access Gateway](https://github.com/aws-samples/bedrock-access-gateway). This gateway provides a unified interface to access models like Amazon Titan, Claude, and others.
+
+### Example Configuration with Bedrock Access Gateway
+
+```yaml
+inputs:
+  api_key: $(BedrockApiKey)
+  api_url: 'https://your-bedrock-access-gateway-endpoint' # Replace with your Bedrock Access Gateway URL
+  ai_model: 'amazon.titan-text' # Specify the foundation model available through AWS Bedrock
+  max_tokens: '8192'
+  bugs: true
+  performance: true
+  best_practices: true
+```
+
+### Why Use Bedrock Access Gateway?
+- Access multiple foundation models through a single API.
+- Leverage AWS Bedrock for enterprise-grade scalability and security.
+- Easily switch between OpenAI and AWS Bedrock models by updating the `api_url` and `ai_model` inputs.
+
+For more information, visit the [Bedrock Access Gateway GitHub repository](https://github.com/aws-samples/bedrock-access-gateway).
+
 ## FAQ
 
 ### Q: What agent job settings are required?

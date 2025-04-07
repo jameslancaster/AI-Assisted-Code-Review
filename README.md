@@ -99,6 +99,56 @@ inputs:
   best_practices: true
 ```
 
+## Specifying the Maximum Tokens
+
+The `max_tokens` input allows you to specify the maximum number of tokens allowed for the OpenAI API request. This parameter ensures that the request stays within the token limit of the selected model. Adjusting this value can help optimize the use of different foundation models.
+
+### Example Usage
+
+To specify the maximum tokens, include the `max_tokens` input in your pipeline configuration:
+
+```yaml
+inputs:
+  api_key: $(OpenAI_ApiKey)
+  ai_model: 'gpt-4'
+  max_tokens: '8192' # Specify the maximum tokens limit
+  bugs: true
+  performance: true
+  best_practices: true
+```
+
+### Notes:
+- The default value for `max_tokens` is `4096`.
+- Ensure the value does not exceed the token limit of the selected model (e.g., `gpt-4` supports up to 8192 tokens for most configurations).
+
+---
+
+## Enabling Access to Other Foundation Models
+
+If you want to use other foundation models, such as those available through AWS Bedrock, you can leverage the [Bedrock Access Gateway](https://github.com/aws-samples/bedrock-access-gateway) project. This gateway enables seamless integration with AWS Bedrock, allowing you to access models like Amazon Titan, Claude, and others.
+
+### Example Configuration with Bedrock Access Gateway
+
+To use the Bedrock Access Gateway, set the `api_url` to point to the gateway endpoint:
+
+```yaml
+inputs:
+  api_key: $(BedrockApiKey)
+  api_url: 'https://your-bedrock-access-gateway-endpoint' # Replace with your Bedrock Access Gateway URL
+  ai_model: 'amazon.titan-text' # Specify the foundation model available through AWS Bedrock
+  max_tokens: '8192'
+  bugs: true
+  performance: true
+  best_practices: true
+```
+
+### Benefits of Using Bedrock Access Gateway:
+- Access multiple foundation models through a unified API.
+- Leverage AWS Bedrock for enterprise-grade scalability and security.
+- Easily switch between OpenAI models and AWS Bedrock models by updating the `api_url` and `ai_model` inputs.
+
+For more details, visit the [Bedrock Access Gateway GitHub repository](https://github.com/aws-samples/bedrock-access-gateway).
+
 ## FAQ
 
 ### Q: What agent job settings are required?
