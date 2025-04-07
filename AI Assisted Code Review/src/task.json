@@ -81,6 +81,14 @@
             "defaultValue": "",
             "required": false,
             "helpMarkDown": "Specify additional Open AI prompts as a comma-separated list to enhance the code review process.\n\n- Add multiple prompts separated by commas.\n- These prompts will be used in conjunction with the main code review prompts.\n\n**Example:**\n```plaintext\nFix variable naming, Ensure consistent indentation, Review error handling approach\n```"
+        },
+        {
+            "name": "max_tokens",
+            "type": "string",
+            "label": "Maximum Tokens",
+            "defaultValue": "4096",
+            "required": false,
+            "helpMarkDown": "Specify the maximum number of tokens allowed for the OpenAI API request. This value ensures the request stays within the model's token limit."
         }
     ],
     "execution": {

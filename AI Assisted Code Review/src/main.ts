@@ -27,6 +27,7 @@ export class Main {
         const filesToExclude = tl.getInput('file_excludes', false);
         const additionalPrompts = tl.getInput('additional_prompts', false)?.split(',');
         const customApiUrl = tl.getInput('api_url', false) || 'https://api.openai.com/v1'; // Default API URL
+        const maxTokens = parseInt(tl.getInput('max_tokens', false) || '4096', 10); // Default to 4096 if not provided
 
         let proxyUrl = tl.getVariable('Agent.ProxyUrl');
 
@@ -42,7 +43,8 @@ export class Main {
             tl.getBoolInput('performance', true),
             tl.getBoolInput('best_practices', true),
             additionalPrompts,
-            customApiUrl // Pass the custom API URL here
+            customApiUrl,
+            maxTokens // Pass the max tokens limit here
         );
 
         this._repository = new Repository();

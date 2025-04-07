@@ -28,11 +28,12 @@ export class ChatGPT {
         checkForPerformance: boolean = false,
         checkForBestPractices: boolean = false,
         additionalPrompts: string[] = [],
-        apiUrl: string = 'https://api.openai.com/v1' // Default OpenAI API URL
+        apiUrl: string = 'https://api.openai.com/v1', // Default OpenAI API URL
+        private maxTokens: number = 4096 // Default maximum tokens
     ) {
         this.apiUrl = apiUrl;
 
-        console.log(`ChatGPT initialized with API URL: ${apiUrl}`);
+        console.log(`ChatGPT initialized with API URL: ${apiUrl} and max tokens: ${maxTokens}`);
 
         this.systemMessage = `Your task is to act as a code reviewer of a Pull Request:
         - Use bullet points if you have multiple comments.
@@ -57,38 +58,41 @@ export class ChatGPT {
             tl.warning(`The specified model "${model}" is not officially supported. Proceeding with caution.`);
         }
 
-        if (!this.doesMessageExceedTokenLimit(diff + this.systemMessage, 4097)) {
-            try {
-                console.log('Request payload:', {
-                    messages: [
-                        { role: 'system', content: this.systemMessage },
-                        { role: 'user', content: diff }
-                    ],
-                    model: model
-                });
+        if (this.doesMessageExceedTokenLimit(diff + this.systemMessage, this.maxTokens)) {
+            tl.warning(`The diff for file ${fileName} exceeds the token limit of ${this.maxTokens}. Skipping review.`);
+            return 'NO_COMMENT';
+        }
 
-                console.log(`Using API URL: ${this.apiUrl}`);
+        try {
+            console.log('Request payload:', {
+                messages: [
+                    { role: 'system', content: this.systemMessage },
+                    { role: 'user', content: diff }
+                ],
+                model: model
+            });
 
-                let openAi = await this._openAi.chat.completions.create({
-                    messages: [
-                        { role: 'system', content: this.systemMessage },
-                        { role: 'user', content: diff }
-                    ],
-                    model: model
-                });
+            console.log(`Using API URL: ${this.apiUrl}`);
 
-                let response = openAi.choices;
+            let openAi = await this._openAi.chat.completions.create({
+                messages: [
+                    { role: 'system', content: this.systemMessage },
+                    { role: 'user', content: diff }
+                ],
+                model: model
+            });
 
-                if (response.length > 0) {
-                    return response[0].message.content!;
-                }
-            } catch (error: any) {
-                tl.error(`Error during API call: ${error.message}`);
-                if (error.response) {
-                    console.error('API response:', error.response.data);
-                }
-                return 'NO_COMMENT';
+            let response = openAi.choices;
+
+            if (response.length > 0) {
+                return response[0].message.content!;
             }
+        } catch (error: any) {
+            tl.error(`Error during API call: ${error.message}`);
+            if (error.response) {
+                console.error('API response:', error.response.data);
+            }
+            return 'NO_COMMENT';
         }
 
         tl.warning(`Unable to process diff for file ${fileName} as it exceeds token limits.`);
