@@ -32,6 +32,8 @@ export class ChatGPT {
     ) {
         this.apiUrl = apiUrl;
 
+        console.log(`ChatGPT initialized with API URL: ${apiUrl}`);
+
         this.systemMessage = `Your task is to act as a code reviewer of a Pull Request:
         - Use bullet points if you have multiple comments.
         ${checkForBugs ? '- If there are any bugs, highlight them.' : null}
@@ -56,24 +58,36 @@ export class ChatGPT {
         }
 
         if (!this.doesMessageExceedTokenLimit(diff + this.systemMessage, 4097)) {
-            let openAi = await this._openAi.chat.completions.create({
-                messages: [
-                    {
-                        role: 'system',
-                        content: this.systemMessage
-                    },
-                    {
-                        role: 'user',
-                        content: diff
-                    }
-                ],
-                model: model
-            });
+            try {
+                console.log('Request payload:', {
+                    messages: [
+                        { role: 'system', content: this.systemMessage },
+                        { role: 'user', content: diff }
+                    ],
+                    model: model
+                });
 
-            let response = openAi.choices;
+                console.log(`Using API URL: ${this.apiUrl}`);
 
-            if (response.length > 0) {
-                return response[0].message.content!;
+                let openAi = await this._openAi.chat.completions.create({
+                    messages: [
+                        { role: 'system', content: this.systemMessage },
+                        { role: 'user', content: diff }
+                    ],
+                    model: model
+                });
+
+                let response = openAi.choices;
+
+                if (response.length > 0) {
+                    return response[0].message.content!;
+                }
+            } catch (error: any) {
+                tl.error(`Error during API call: ${error.message}`);
+                if (error.response) {
+                    console.error('API response:', error.response.data);
+                }
+                return 'NO_COMMENT';
             }
         }
 

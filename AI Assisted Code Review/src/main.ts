@@ -42,7 +42,7 @@ export class Main {
             tl.getBoolInput('performance', true),
             tl.getBoolInput('best_practices', true),
             additionalPrompts,
-            customApiUrl
+            customApiUrl // Pass the custom API URL here
         );
 
         this._repository = new Repository();
