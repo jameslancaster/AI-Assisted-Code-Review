@@ -53,7 +53,7 @@ Supercharge your workflow with AI-powered code reviews. Install the extension no
        inputs:
          ai_provider: 'openai'
          api_key: $(OpenAI_ApiKey)
-         ai_model: 'gpt-4'
+         ai_model: 'gpt-4o'
          bugs: true
          performance: true
          best_practices: true
@@ -91,13 +91,13 @@ Supercharge your workflow with AI-powered code reviews. Install the extension no
 | `file_excludes` | No | — | Comma-separated filenames to exclude |
 | `additional_prompts` | No | — | Extra review instructions (comma-separated) |
 | `system_prompt` | No | — | Fully custom system prompt (see [Custom System Prompt](#custom-system-prompt)) |
-| `max_tokens` | No | `4096` | Maximum tokens for the AI response |
+| `max_tokens` | No | `8192` | Maximum tokens for the AI response |
 
 ## Selecting a Model
 
 The `ai_model` input accepts any model name supported by the selected provider. If the model is not in the known list, a warning is logged but the task proceeds.
 
-**OpenAI models:** `gpt-4`, `gpt-4-turbo`, `gpt-3.5-turbo`, etc.
+**OpenAI models:** `gpt-4o`, `gpt-4o-mini`, `gpt-4-turbo`, `gpt-3.5-turbo`, etc.
 
 **Anthropic models:** `claude-sonnet-4-6`, `claude-opus-4-6`, `claude-haiku-4-5-20251001`, `claude-3-5-sonnet-latest`, `claude-3-5-haiku-latest`, `claude-3-opus-latest`
 
@@ -139,8 +139,8 @@ This is useful for proxies, Azure OpenAI Service deployments, or other OpenAI-co
 inputs:
   ai_provider: 'openai'
   api_key: $(AzureOpenAI_ApiKey)
-  api_url: 'https://my-deployment.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-02-15-preview'
-  ai_model: 'gpt-4'
+  api_url: 'https://my-deployment.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview'
+  ai_model: 'gpt-4o'
 ```
 
 ## Maximum Tokens
@@ -149,11 +149,11 @@ The `max_tokens` input sets the maximum number of tokens for the AI response. Fi
 
 ```yaml
 inputs:
-  ai_model: 'gpt-4'
+  ai_model: 'gpt-4o'
   max_tokens: '8192'
 ```
 
-The default is `4096`. Set this to match the context window of your chosen model.
+The default is `8192`. Set this to match the context window of your chosen model.
 
 ---
 

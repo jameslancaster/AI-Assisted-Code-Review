@@ -37,7 +37,7 @@
             "name": "ai_model",
             "type": "string",
             "label": "AI Model",
-            "defaultValue": "gpt-3.5-turbo",
+            "defaultValue": "gpt-4o",
             "required": true,
             "helpMarkDown": "The model to use for code reviews. For OpenAI: `gpt-4`, `gpt-3.5-turbo`, etc. For Anthropic: `claude-sonnet-4-6`, `claude-opus-4-6`, `claude-haiku-4-5-20251001`, etc."
         },
@@ -106,7 +106,7 @@
             "name": "max_tokens",
             "type": "string",
             "label": "Maximum Tokens",
-            "defaultValue": "4096",
+            "defaultValue": "8192",
             "required": false,
             "helpMarkDown": "Specify the maximum number of tokens allowed for the AI API response. This value ensures the request stays within the model's token limit. Also used to skip files whose diff is too large to review."
         }
