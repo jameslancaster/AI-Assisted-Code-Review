@@ -1,12 +1,18 @@
 import tl = require('azure-pipelines-task-lib/task');
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { OpenAI } from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 import { ChatGPT } from './chatgpt';
+import { AnthropicReviewer } from './anthropic';
 import { PullRequest } from './pullrequest';
 import { Repository } from './repository';
 
+interface ICodeReviewer {
+    PerformCodeReview(diff: string, fileName: string): Promise<string>;
+}
+
 export class Main {
-    private static _chatGpt: ChatGPT;
+    private static _reviewer: ICodeReviewer;
     private static _repository: Repository;
     private static _pullRequest: PullRequest;
 
@@ -21,31 +27,55 @@ export class Main {
             return;
         }
 
+        const aiProvider = tl.getInput('ai_provider', true)!;
         const apiKey = tl.getInput('api_key', true)!;
-        const aiModel = tl.getInput('ai_model', true)!; // Retrieve the model to use
         const fileExtensions = tl.getInput('file_extensions', false);
         const filesToExclude = tl.getInput('file_excludes', false);
-        const additionalPrompts = tl.getInput('additional_prompts', false)?.split(',');
-        const customApiUrl = tl.getInput('api_url', false) || 'https://api.openai.com/v1'; // Default API URL
-        const maxTokens = parseInt(tl.getInput('max_tokens', false) || '4096', 10); // Default to 4096 if not provided
+        const additionalPrompts = tl.getInput('additional_prompts', false)?.split(',') ?? [];
+        const customApiUrl = tl.getInput('api_url', false) || '';
+        const maxTokens = parseInt(tl.getInput('max_tokens', false) || '4096', 10);
+        const systemPromptOverride = tl.getInput('system_prompt', false) || undefined;
+
+        const bugs = tl.getBoolInput('bugs', true);
+        const performance = tl.getBoolInput('performance', true);
+        const bestPractices = tl.getBoolInput('best_practices', true);
 
         let proxyUrl = tl.getVariable('Agent.ProxyUrl');
 
-        const openAiClient = new OpenAI({
-            apiKey: apiKey,
-            baseURL: customApiUrl, // Set the custom API URL here
-            httpAgent: proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined
-        });
+        if (aiProvider === 'anthropic') {
+            const anthropicClient = new Anthropic({
+                apiKey: apiKey,
+                baseURL: customApiUrl || undefined,
+                httpAgent: proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined
+            });
 
-        this._chatGpt = new ChatGPT(
-            openAiClient,
-            tl.getBoolInput('bugs', true),
-            tl.getBoolInput('performance', true),
-            tl.getBoolInput('best_practices', true),
-            additionalPrompts,
-            customApiUrl,
-            maxTokens // Pass the max tokens limit here
-        );
+            this._reviewer = new AnthropicReviewer(
+                anthropicClient,
+                bugs,
+                performance,
+                bestPractices,
+                additionalPrompts,
+                maxTokens,
+                systemPromptOverride
+            );
+        } else {
+            const openAiClient = new OpenAI({
+                apiKey: apiKey,
+                baseURL: customApiUrl || 'https://api.openai.com/v1',
+                httpAgent: proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined
+            });
+
+            this._reviewer = new ChatGPT(
+                openAiClient,
+                bugs,
+                performance,
+                bestPractices,
+                additionalPrompts,
+                customApiUrl || 'https://api.openai.com/v1',
+                maxTokens,
+                systemPromptOverride
+            );
+        }
 
         this._repository = new Repository();
         this._pullRequest = new PullRequest();
@@ -59,7 +89,7 @@ export class Main {
         for (let index = 0; index < filesToReview.length; index++) {
             const fileToReview = filesToReview[index];
             let diff = await this._repository.GetDiff(fileToReview);
-            let review = await this._chatGpt.PerformCodeReview(diff, fileToReview);
+            let review = await this._reviewer.PerformCodeReview(diff, fileToReview);
 
             if (review.indexOf('NO_COMMENT') < 0) {
                 await this._pullRequest.AddComment(fileToReview, review);

@@ -29,25 +29,30 @@ export class ChatGPT {
         checkForBestPractices: boolean = false,
         additionalPrompts: string[] = [],
         apiUrl: string = 'https://api.openai.com/v1', // Default OpenAI API URL
-        private maxTokens: number = 4096 // Default maximum tokens
+        private maxTokens: number = 4096, // Default maximum tokens
+        systemPromptOverride?: string
     ) {
         this.apiUrl = apiUrl;
 
         console.log(`ChatGPT initialized with API URL: ${apiUrl} and max tokens: ${maxTokens}`);
 
-        this.systemMessage = `Your task is to act as a code reviewer of a Pull Request:
+        if (systemPromptOverride) {
+            this.systemMessage = systemPromptOverride;
+        } else {
+            this.systemMessage = `Your task is to act as a code reviewer of a Pull Request:
         - Use bullet points if you have multiple comments.
         ${checkForBugs ? '- If there are any bugs, highlight them.' : null}
         ${checkForPerformance ? '- If there are major performance problems, highlight them.' : null}
         ${checkForBestPractices ? '- Provide details on missed use of best-practices.' : null}
         ${additionalPrompts.length > 0 ? additionalPrompts.map(str => `- ${str}`).join('\n') : null}
         - Do not highlight minor issues and nitpicks.
-        - Only provide instructions for improvements 
+        - Only provide instructions for improvements
         - If you have no instructions respond with NO_COMMENT only, otherwise provide your instructions.
-    
+
         You are provided with the code changes (diffs) in a unidiff format.
-        
+
         The response should be in markdown format.`;
+        }
     }
 
     public async PerformCodeReview(diff: string, fileName: string): Promise<string> {
