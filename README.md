@@ -2,19 +2,20 @@
 
 ## Elevate Your Code Review Process with AI
 
-Welcome to the **AI-Assisted Code Review DevOps Extension**! Revolutionize your development process by integrating OpenAI’s cutting-edge language models into your Azure DevOps pipeline. Transform your code reviews into a smart, efficient, and insightful process.
+Welcome to the **AI-Assisted Code Review DevOps Extension**! Integrate leading AI models from **OpenAI** or **Anthropic** directly into your Azure DevOps pipeline for smart, efficient, and insightful code reviews on every pull request.
 
 ### Start Improving Your Code Reviews Today
 
-Supercharge your workflow with AI-powered code reviews. Install the extension now and unlock intelligent, actionable insights for every code change. Embrace the future of code reviews with ease!
+Supercharge your workflow with AI-powered code reviews. Install the extension now and unlock intelligent, actionable insights for every code change.
 
 ## Why Use AI-Assisted Code Review?
 
 - **Automated Code Analysis:** Eliminate manual inspections with AI-driven analysis that detects bugs, performance issues, and suggests best practices automatically.
 - **Simple Installation:** Get started quickly with a one-click installation from the [Azure DevOps Marketplace](https://marketplace.visualstudio.com/items?itemName=AeriesSoftware.aeries-ai-assisted-code-review).
-- **Intelligent Insights:** Harness advanced natural language processing to receive meaningful feedback on your pull requests.
+- **Multiple AI Providers:** Choose between OpenAI (GPT-4, GPT-3.5, etc.) or Anthropic (Claude Sonnet, Claude Opus, etc.) with a single configuration change.
+- **Customizable System Prompt:** Override the built-in review prompt entirely via a pipeline variable — no code changes required.
 - **Accelerated Review Cycles:** Save time by letting AI handle routine reviews, so your team can focus on what truly matters.
-- **Customizable Settings:** Adapt the extension to your needs by configuring the AI model, file exclusions, additional review prompts, and even the OpenAI API URL.
+- **Flexible Configuration:** Configure the AI model, file exclusions, additional review prompts, and API endpoint to suit your environment.
 
 ## AI-Assisted Code Review - Flow Diagram
 ![image](https://github.com/user-attachments/assets/52f6a1b3-c1f3-4496-bb1f-857393d261ab)
@@ -22,13 +23,16 @@ Supercharge your workflow with AI-powered code reviews. Install the extension no
 ## Prerequisites
 
 - An [Azure DevOps Account](https://dev.azure.com/)
-- An [OpenAI API Key](https://platform.openai.com/docs/overview)
+- An API key for your chosen provider:
+  - [OpenAI API Key](https://platform.openai.com/docs/overview) for GPT models
+  - [Anthropic API Key](https://console.anthropic.com/) for Claude models
 
-## Getting started
+## Getting Started
 
-1. Install the AI Assisted Code Review DevOps Extension from the [Azure DevOps Marketplace]([https://marketplace.visualstudio.com/azuredevops](https://marketplace.visualstudio.com/items?itemName=AeriesSoftware.aeries-ai-assisted-code-review)).
-2. Add AI Assisted Code Review Task to Your Pipeline:
+1. Install the AI Assisted Code Review DevOps Extension from the [Azure DevOps Marketplace](https://marketplace.visualstudio.com/items?itemName=AeriesSoftware.aeries-ai-assisted-code-review).
+2. Add the AI Assisted Code Review Task to your pipeline:
 
+   **OpenAI example:**
    ```yaml
    trigger:
      branches:
@@ -47,105 +51,124 @@ Supercharge your workflow with AI-powered code reviews. Install the extension no
      steps:
      - task: AIAssistedCodeReviewTask@1
        inputs:
+         ai_provider: 'openai'
          api_key: $(OpenAI_ApiKey)
-         ai_model: 'gpt-4' # Specify the model to use
+         ai_model: 'gpt-4o'
          bugs: true
          performance: true
          best_practices: true
          file_extensions: '.js,.ts,.css,.html'
          file_excludes: 'file1.js,file2.py,secret.txt'
          additional_prompts: 'Fix variable naming, Ensure consistent indentation, Review error handling approach'
-         api_url: 'https://custom-openai-api.com/v1' # Optional: Specify a custom OpenAI API URL
    ```
 
-3. If you do not already have Build Validation configured for your branch already add [Build validation](https://learn.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops&tabs=browser#build-validation) to your branch policy to trigger the code review when a Pull Request is created.
+   **Anthropic example:**
+   ```yaml
+   - task: AIAssistedCodeReviewTask@1
+     inputs:
+       ai_provider: 'anthropic'
+       api_key: $(Anthropic_ApiKey)
+       ai_model: 'claude-sonnet-4-6'
+       bugs: true
+       performance: true
+       best_practices: true
+   ```
 
-## Specifying the AI Model
+3. If you do not already have Build Validation configured, add [Build validation](https://learn.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops&tabs=browser#build-validation) to your branch policy to trigger the code review when a Pull Request is created.
 
-The `ai_model` input allows you to specify the OpenAI model to use for code reviews. You can choose from supported models like `gpt-4`, `gpt-3.5-turbo`, or any other model supported by OpenAI. If the specified model is not officially supported, a warning will be logged, but the task will proceed.
+## Configuration Reference
 
-### Example Usage
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `ai_provider` | Yes | `openai` | AI provider to use: `openai` or `anthropic` |
+| `api_key` | Yes | — | API key for the selected provider |
+| `ai_model` | Yes | `gpt-3.5-turbo` | Model name (see [Selecting a Model](#selecting-a-model)) |
+| `api_url` | No | *(provider default)* | Override the API endpoint URL |
+| `bugs` | No | `true` | Check for bugs |
+| `performance` | No | `true` | Check for performance problems |
+| `best_practices` | No | `true` | Check for missed best practices |
+| `file_extensions` | No | — | Comma-separated extensions to review, e.g. `.js,.ts` |
+| `file_excludes` | No | — | Comma-separated filenames to exclude |
+| `additional_prompts` | No | — | Extra review instructions (comma-separated) |
+| `system_prompt` | No | — | Fully custom system prompt (see [Custom System Prompt](#custom-system-prompt)) |
+| `max_tokens` | No | `8192` | Maximum tokens for the AI response |
 
-To specify the model, include the `ai_model` input in your pipeline configuration:
+## Selecting a Model
 
-```yaml
-inputs:
-  api_key: $(OpenAI_ApiKey)
-  ai_model: 'gpt-4' # Replace with the desired model
-  bugs: true
-  performance: true
-  best_practices: true
-```
+The `ai_model` input accepts any model name supported by the selected provider. If the model is not in the known list, a warning is logged but the task proceeds.
 
-### Notes:
-- If the model is not in the list of officially supported models, a warning will be logged, but the task will still attempt to use the specified model.
-- Ensure the model you specify is available in your OpenAI account.
+**OpenAI models:** `gpt-4o`, `gpt-4o-mini`, `gpt-4-turbo`, `gpt-3.5-turbo`, etc.
 
-## Custom API URL Support
-
-The `api_url` input allows you to specify a custom URL for the OpenAI API. This is useful if you are using a proxy, a custom deployment of the OpenAI API, or an alternative API endpoint. If not provided, the default URL (`https://api.openai.com/v1`) will be used.
-
-### Example Usage
-
-To use a custom API URL, include the `api_url` input in your pipeline configuration:
-
-```yaml
-inputs:
-  api_key: $(OpenAI_ApiKey)
-  api_url: 'https://custom-openai-api.com/v1' # Replace with your custom API URL
-  ai_model: 'gpt-4'
-  bugs: true
-  performance: true
-  best_practices: true
-```
-
-## Specifying the Maximum Tokens
-
-The `max_tokens` input allows you to specify the maximum number of tokens allowed for the OpenAI API request. This parameter ensures that the request stays within the token limit of the selected model. Adjusting this value can help optimize the use of different foundation models.
-
-### Example Usage
-
-To specify the maximum tokens, include the `max_tokens` input in your pipeline configuration:
+**Anthropic models:** `claude-sonnet-4-6`, `claude-opus-4-6`, `claude-haiku-4-5-20251001`, `claude-3-5-sonnet-latest`, `claude-3-5-haiku-latest`, `claude-3-opus-latest`
 
 ```yaml
 inputs:
-  api_key: $(OpenAI_ApiKey)
-  ai_model: 'gpt-4'
-  max_tokens: '8192' # Specify the maximum tokens limit
-  bugs: true
-  performance: true
-  best_practices: true
+  ai_provider: 'anthropic'
+  api_key: $(Anthropic_ApiKey)
+  ai_model: 'claude-sonnet-4-6'
 ```
 
-### Notes:
-- The default value for `max_tokens` is `4096`.
-- Ensure the value does not exceed the token limit of the selected model (e.g., `gpt-4` supports up to 8192 tokens for most configurations).
+## Custom System Prompt
+
+The `system_prompt` input lets you replace the built-in review prompt with your own. When set, the `bugs`, `performance`, `best_practices`, and `additional_prompts` inputs are ignored — your prompt is used verbatim.
+
+This is the recommended way to customize review behavior without modifying extension code. Store the prompt in a pipeline variable or variable group and reference it here.
+
+```yaml
+inputs:
+  ai_provider: 'anthropic'
+  api_key: $(Anthropic_ApiKey)
+  ai_model: 'claude-sonnet-4-6'
+  system_prompt: |
+    You are a senior security engineer reviewing a pull request.
+    Focus exclusively on security vulnerabilities, unsafe deserialization,
+    injection risks, and missing input validation.
+    Respond in markdown with bullet points.
+    If there are no issues, respond with NO_COMMENT only.
+```
+
+Leave `system_prompt` blank to use the built-in dynamic prompt assembled from the `bugs`, `performance`, `best_practices`, and `additional_prompts` flags.
+
+## Custom API URL
+
+The `api_url` input overrides the default endpoint for the selected provider. Leave it blank to use the provider default (`https://api.openai.com/v1` for OpenAI, `https://api.anthropic.com` for Anthropic).
+
+This is useful for proxies, Azure OpenAI Service deployments, or other OpenAI-compatible endpoints.
+
+```yaml
+inputs:
+  ai_provider: 'openai'
+  api_key: $(AzureOpenAI_ApiKey)
+  api_url: 'https://my-deployment.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview'
+  ai_model: 'gpt-4o'
+```
+
+## Maximum Tokens
+
+The `max_tokens` input sets the maximum number of tokens for the AI response. Files whose diff exceeds this limit are skipped to avoid API errors.
+
+```yaml
+inputs:
+  ai_model: 'gpt-4o'
+  max_tokens: '8192'
+```
+
+The default is `8192`. Set this to match the context window of your chosen model.
 
 ---
 
-## Enabling Access to Other Foundation Models
+## Enabling Access to Other Foundation Models via AWS Bedrock
 
-If you want to use other foundation models, such as those available through AWS Bedrock, you can leverage the [Bedrock Access Gateway](https://github.com/aws-samples/bedrock-access-gateway) project. This gateway enables seamless integration with AWS Bedrock, allowing you to access models like Amazon Titan, Claude, and others.
-
-### Example Configuration with Bedrock Access Gateway
-
-To use the Bedrock Access Gateway, set the `api_url` to point to the gateway endpoint:
+To use models through [AWS Bedrock](https://aws.amazon.com/bedrock/), use the [Bedrock Access Gateway](https://github.com/aws-samples/bedrock-access-gateway) project to expose a OpenAI-compatible endpoint and point `api_url` at it.
 
 ```yaml
 inputs:
+  ai_provider: 'openai'
   api_key: $(BedrockApiKey)
-  api_url: 'https://your-bedrock-access-gateway-endpoint' # Replace with your Bedrock Access Gateway URL
-  ai_model: 'amazon.titan-text' # Specify the foundation model available through AWS Bedrock
+  api_url: 'https://your-bedrock-access-gateway-endpoint'
+  ai_model: 'amazon.titan-text'
   max_tokens: '8192'
-  bugs: true
-  performance: true
-  best_practices: true
 ```
-
-### Benefits of Using Bedrock Access Gateway:
-- Access multiple foundation models through a unified API.
-- Leverage AWS Bedrock for enterprise-grade scalability and security.
-- Easily switch between OpenAI models and AWS Bedrock models by updating the `api_url` and `ai_model` inputs.
 
 For more details, visit the [Bedrock Access Gateway GitHub repository](https://github.com/aws-samples/bedrock-access-gateway).
 
