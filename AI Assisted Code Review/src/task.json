@@ -9,7 +9,7 @@
     "version": {
         "Major": 1,
         "Minor": 1,
-        "Patch": 0
+        "Patch": 3
     },
     "instanceNameFormat": "AI-Assisted Code Review $(message)",
     "inputs": [
@@ -113,6 +113,9 @@
     ],
     "execution": {
         "Node20": {
+            "target": "main.js"
+        },
+        "Node16": {
             "target": "main.js"
         }
     }

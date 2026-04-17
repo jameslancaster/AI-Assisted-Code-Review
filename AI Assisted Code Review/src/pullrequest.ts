@@ -16,14 +16,20 @@ export class PullRequest {
         });
     }
 
-    public async AddComment(fileName: string, comment: string): Promise<boolean> {
+    public async AddComment(fileName: string, comment: string, lineNumber?: number): Promise<boolean> {
 
-        console.info(`Comment added to ${fileName}`);
+        console.info(`Comment added to ${fileName}${lineNumber ? ` (line ${lineNumber})` : ''}`);
 
         if (!fileName.startsWith('/')) {
             fileName = `/${fileName}`;
         }
-        
+
+        const threadContext: any = { filePath: fileName };
+        if (lineNumber && lineNumber > 0) {
+            threadContext.rightFileStart = { line: lineNumber, offset: 1 };
+            threadContext.rightFileEnd = { line: lineNumber, offset: 1 };
+        }
+
         let body = {
             comments: [
                 {
@@ -32,9 +38,7 @@ export class PullRequest {
                 }
             ],
             status: 1,
-            threadContext: {
-                filePath: fileName,
-            },
+            threadContext,
             pullRequestThreadContext: {
                 changeTrackingId: 1,
                 iterationContext: {
@@ -44,11 +48,11 @@ export class PullRequest {
             }
         }
 
-        let endpoint = `${this._collectionUri}${this._teamProjectId}/_apis/git/repositories/${this._repositoryName}/pullRequests/${this._pullRequestId}/threads?api-version=7.0`
+        let endpoint = `${this._collectionUri}${this._teamProjectId}/_apis/git/repositories/${this._repositoryName}/pullRequests/${this._pullRequestId}/threads?api-version=5.1`
 
         var response = await fetch(endpoint, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${tl.getVariable('SYSTEM.ACCESSTOKEN')}`, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': `Bearer ${tl.getVariable('System.AccessToken')}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
             agent: this._httpsAgent
         });
@@ -81,21 +85,40 @@ export class PullRequest {
     }
 
     public async DeleteComments() {
-        let collectionName = this._collectionUri.replace('https://', '').replace('http://', '').split('/')[1];
-        let buildServiceName = `${tl.getVariable('SYSTEM.TEAMPROJECT')} Build Service (${collectionName})`;
+        let collectionName = this.GetCollectionName();
+        let buildServiceName = `${tl.getVariable('System.TeamProject')} Build Service (${collectionName})`;
 
         let threads = await this.GetThreads();
 
         for (let thread of threads as any[]) {
             let comments = await this.GetComments(thread);
+            let authoredComments = (comments?.value ?? []).filter((comment: any) => comment?.author?.displayName === buildServiceName);
 
-            for (let comment of comments.value.filter((comment: any) => comment.author.displayName === buildServiceName) as any[]) {
+            for (let comment of authoredComments as any[]) {
                 await this.DeleteComment(thread, comment);
             }
         }
     }
 
-    public async GetThreads(): Promise<never[]> {
+    private GetCollectionName(): string {
+        try {
+            const url = new URL(this._collectionUri);
+            // Legacy URL format: https://{organization}.visualstudio.com/
+            if (url.hostname.endsWith('.visualstudio.com')) {
+                return url.hostname.split('.')[0];
+            }
+            // Modern URL format: https://dev.azure.com/{organization}/
+            const segments = url.pathname.split('/').filter(seg => seg.length > 0);
+            if (segments.length > 0) {
+                return segments[0];
+            }
+        } catch {
+            // Fall through to legacy string parsing
+        }
+        return this._collectionUri.replace('https://', '').replace('http://', '').split('/')[1] ?? '';
+    }
+
+    public async GetThreads(): Promise<any[]> {
         let threadsEndpoint = `${this._collectionUri}${this._teamProjectId}/_apis/git/repositories/${this._repositoryName}/pullRequests/${this._pullRequestId}/threads?api-version=5.1`;
         let threadsResponse = await fetch(threadsEndpoint, {
             headers: { 'Authorization': `Bearer ${tl.getVariable('System.AccessToken')}`, 'Content-Type': 'application/json' },
@@ -107,7 +130,7 @@ export class PullRequest {
         }
 
         let threads = await threadsResponse.json();
-        return threads.value.filter((thread: any) => thread.threadContext !== null);
+        return (threads?.value ?? []).filter((thread: any) => thread?.threadContext != null);
     }
 
     public async GetComments(thread: any): Promise<any> {

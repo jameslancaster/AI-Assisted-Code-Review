@@ -6,9 +6,10 @@ import { ChatGPT } from './chatgpt';
 import { AnthropicReviewer } from './anthropic';
 import { PullRequest } from './pullrequest';
 import { Repository } from './repository';
+import { IInlineComment } from './types';
 
 interface ICodeReviewer {
-    PerformCodeReview(diff: string, fileName: string): Promise<string>;
+    PerformCodeReview(diff: string, fileName: string, fileContent?: string): Promise<IInlineComment[]>;
 }
 
 export class Main {
@@ -31,9 +32,10 @@ export class Main {
         const apiKey = tl.getInput('api_key', true)!;
         const fileExtensions = tl.getInput('file_extensions', false);
         const filesToExclude = tl.getInput('file_excludes', false);
-        const additionalPrompts = tl.getInput('additional_prompts', false)?.split(',') ?? [];
+        const additionalPrompts = tl.getInput('additional_prompts', false)?.split(',').map(p => p.trim()).filter(p => p.length > 0) ?? [];
         const customApiUrl = tl.getInput('api_url', false) || '';
-        const maxTokens = parseInt(tl.getInput('max_tokens', false) || '4096', 10);
+        const parsedMaxTokens = parseInt(tl.getInput('max_tokens', false) || '4096', 10);
+        const maxTokens = Number.isFinite(parsedMaxTokens) && parsedMaxTokens > 0 ? parsedMaxTokens : 4096;
         const systemPromptOverride = tl.getInput('system_prompt', false) || undefined;
 
         const bugs = tl.getBoolInput('bugs', true);
@@ -85,20 +87,25 @@ export class Main {
         let filesToReview = await this._repository.GetChangedFiles(fileExtensions, filesToExclude);
 
         tl.setProgress(0, 'Performing Code Review');
+        let completedCount = 0;
 
-        for (let index = 0; index < filesToReview.length; index++) {
-            const fileToReview = filesToReview[index];
-            let diff = await this._repository.GetDiff(fileToReview);
-            let review = await this._reviewer.PerformCodeReview(diff, fileToReview);
+        await Promise.allSettled(filesToReview.map(async (fileToReview) => {
+            const [diff, fileContent] = await Promise.all([
+                this._repository.GetDiff(fileToReview),
+                this._repository.GetFileContent(fileToReview),
+            ]);
 
-            if (review.indexOf('NO_COMMENT') < 0) {
-                await this._pullRequest.AddComment(fileToReview, review);
+            const comments = await this._reviewer.PerformCodeReview(diff, fileToReview, fileContent);
+
+            for (const item of comments) {
+                const lineNum = (item.lineNumber && item.lineNumber > 0) ? item.lineNumber : undefined;
+                await this._pullRequest.AddComment(fileToReview, item.comment, lineNum);
             }
 
+            completedCount++;
+            tl.setProgress(Math.round((completedCount / filesToReview.length) * 100), 'Performing Code Review');
             console.info(`Completed review of file ${fileToReview}`);
-
-            tl.setProgress((fileToReview.length / 100) * index, 'Performing Code Review');
-        }
+        }));
 
         tl.setResult(tl.TaskResult.Succeeded, "Pull Request reviewed.");
     }

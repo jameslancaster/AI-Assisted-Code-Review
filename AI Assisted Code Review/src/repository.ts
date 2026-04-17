@@ -1,6 +1,8 @@
 import * as tl from "azure-pipelines-task-lib/task";
 import { SimpleGit, SimpleGitOptions, simpleGit } from "simple-git";
 import binaryExtensions from "./binaryExtensions.json";
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
 export class Repository {
 
@@ -10,6 +12,7 @@ export class Repository {
     };
 
     private readonly _repository: SimpleGit;
+    private _targetBranch: string | null = null;
 
     constructor() {
         this._repository = simpleGit(this.gitOptions);
@@ -27,12 +30,12 @@ export class Repository {
         let filesToReview = files.filter(file => !binaryExtensions.includes(file.slice((file.lastIndexOf(".") - 1 >>> 0) + 2)));
 
         if(fileExtensions) {
-            let fileExtensionsToInclude = fileExtensions.trim().split(',');
+            let fileExtensionsToInclude = fileExtensions.split(',').map(ext => ext.trim()).filter(ext => ext.length > 0);
             filesToReview = filesToReview.filter(file => fileExtensionsToInclude.includes(file.substring(file.lastIndexOf('.'))));
         }
 
         if(filesToExclude) {
-            let fileNamesToExclude = filesToExclude.trim().split(',')
+            let fileNamesToExclude = filesToExclude.split(',').map(name => name.trim()).filter(name => name.length > 0);
             filesToReview = filesToReview.filter(file => !fileNamesToExclude.includes(file.split('/').pop()!.trim()))
         }
 
@@ -41,13 +44,23 @@ export class Repository {
 
     public async GetDiff(fileName: string): Promise<string> {
         let targetBranch = this.GetTargetBranch();
-        
-        let diff = await this._repository.diff([targetBranch, '--', fileName]);
-
+        let diff = await this._repository.diff([targetBranch, '-U30', '--', fileName]);
         return diff;
     }
 
+    public async GetFileContent(fileName: string): Promise<string | undefined> {
+        try {
+            const workDir = tl.getVariable('System.DefaultWorkingDirectory')!;
+            const fullPath = path.join(workDir, fileName);
+            return await fs.readFile(fullPath, 'utf-8');
+        } catch {
+            return undefined;
+        }
+    }
+
     private GetTargetBranch(): string {
+        if (this._targetBranch) return this._targetBranch;
+
         let targetBranchName = tl.getVariable('System.PullRequest.TargetBranchName');
 
         if (!targetBranchName) {
@@ -58,6 +71,7 @@ export class Repository {
             throw new Error(`Could not find target branch`)
         }
 
-        return `origin/${targetBranchName}`;
+        this._targetBranch = `origin/${targetBranchName}`;
+        return this._targetBranch;
     }
 }
